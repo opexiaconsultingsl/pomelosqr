@@ -1,4 +1,5 @@
-const CACHE_NAME = "control-confeccion-cache-v1";
+const CACHE_NAME = "control-confeccion-cache-v2";
+
 const ASSETS = [
   "./",
   "./index.html",
@@ -33,11 +34,15 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(req).then(cached => {
-      return cached || fetch(req).then(res => {
-        const resClone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
-        return res;
-      }).catch(() => caches.match("./index.html"));
+      if (cached) return cached;
+
+      return fetch(req)
+        .then(res => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
+          return res;
+        })
+        .catch(() => caches.match("./index.html"));
     })
   );
 });
