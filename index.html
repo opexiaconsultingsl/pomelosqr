@@ -183,6 +183,64 @@
       display:none;
     }
 
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.38);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:10000;
+    }
+
+    .modal-card{
+      width:min(360px,100%);
+      background:#fff;
+      border-radius:18px;
+      border:2px solid var(--stroke);
+      box-shadow:var(--shadow);
+      padding:20px;
+      text-align:center;
+    }
+
+    .modal-title{
+      font-size:20px;
+      font-weight:900;
+      margin-bottom:8px;
+    }
+
+    .modal-text{
+      font-size:18px;
+      font-weight:700;
+      margin-bottom:18px;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap:10px;
+    }
+
+    .modal-btn{
+      flex:1;
+      padding:16px;
+      border-radius:14px;
+      border:2px solid var(--stroke);
+      font-size:18px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .modal-btn.primary{
+      background:var(--green);
+      color:var(--ink);
+    }
+
+    .modal-btn.secondary{
+      background:#fff;
+      color:var(--ink);
+    }
+
     @media (max-width:420px){
       h1{ font-size:24px; }
       .btn{ font-size:16px; padding:16px; }
@@ -244,19 +302,25 @@
 
       <div id="reader"></div>
       <div class="status" id="scanStatus">Preparado para escanear o introducir QR manualmente.</div>
+      <div class="mini">El envío se realiza automáticamente tras cada lectura.</div>
+    </div>
+  </div>
+
+  <div id="duplicateModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-title">CÓDIGO QR DUPLICADO</div>
+      <div class="modal-text">¿REGISTRAR?</div>
+      <div class="modal-actions">
+        <button id="btnDuplicateNo" type="button" class="modal-btn secondary">No</button>
+        <button id="btnDuplicateYes" type="button" class="modal-btn primary">Sí</button>
+      </div>
     </div>
   </div>
 
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
-    // =========================
-    // CONFIG
-    // =========================
     const API_URL = "https://script.google.com/macros/s/AKfycbyeAlya_wQ54nN7lxy2nqL70yxnOWUf2yD34Ld2pdljCjVAOgChmGO54rLAIsHcUmOeRA/exec";
 
-    // =========================
-    // ELEMENTOS
-    // =========================
     const elTipoConfeccion = document.getElementById("tipoConfeccion");
     const elCalidad = document.getElementById("calidad");
     const elCodigoQr = document.getElementById("codigoQr");
@@ -270,10 +334,21 @@
     const netStatus = document.getElementById("netStatus");
     const queueStatus = document.getElementById("queueStatus");
 
-    // =========================
-    // PERSISTENCIA CAMPOS FIJOS
-    // =========================
+    const duplicateModal = document.getElementById("duplicateModal");
+    const btnDuplicateNo = document.getElementById("btnDuplicateNo");
+    const btnDuplicateYes = document.getElementById("btnDuplicateYes");
+
     const SETTINGS_KEY = "control_confeccion_settings_v1";
+    const QKEY = "control_confeccion_queue_v1";
+
+    let sending = false;
+    let html5QrCode = null;
+    let scannerRunning = false;
+    let lastScanText = "";
+    let lastScanAt = 0;
+    let lastCodigoEnviado = "";
+    let pendingDuplicateResolver = null;
+    let pendingDuplicateCode = "";
 
     function loadSettings(){
       try{
@@ -300,9 +375,6 @@
     elTipoConfeccion.addEventListener("change", saveSettings);
     elCalidad.addEventListener("change", saveSettings);
 
-    // =========================
-    // TOAST
-    // =========================
     const toast = document.createElement("div");
     toast.style.cssText = `
       position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
@@ -320,9 +392,6 @@
       showToast._t = setTimeout(() => (toast.style.opacity = "0"), 1600);
     }
 
-    // =========================
-    // UTILIDADES
-    // =========================
     function updateNetStatus(){
       netStatus.textContent = navigator.onLine ? "Online" : "Offline";
     }
@@ -343,11 +412,6 @@
       const v = elCodigoQr.value.trim();
       elCodigoError.style.display = (v && !isValidQr(v)) ? "block" : "none";
     }
-
-    // =========================
-    // COLA OFFLINE
-    // =========================
-    const QKEY = "control_confeccion_queue_v1";
 
     function loadQueue(){
       try{
@@ -379,8 +443,6 @@
     function queueLength(){
       return loadQueue().length;
     }
-
-    let sending = false;
 
     async function sendOne(item){
       const url = new URL(API_URL);
@@ -431,10 +493,36 @@
     window.addEventListener("offline", updateNetStatus);
     setInterval(flushQueue, 4000);
 
-    // =========================
-    // ENVÍO AUTOMÁTICO
-    // =========================
-    let lastCodigoEnviado = "";
+    function askDuplicateConfirmation(codigo){
+      pendingDuplicateCode = codigo;
+      duplicateModal.classList.remove("hidden");
+
+      return new Promise((resolve) => {
+        pendingDuplicateResolver = resolve;
+      });
+    }
+
+    function closeDuplicateModal(){
+      duplicateModal.classList.add("hidden");
+      pendingDuplicateCode = "";
+    }
+
+    btnDuplicateNo.addEventListener("click", () => {
+      closeDuplicateModal();
+      if(pendingDuplicateResolver){
+        pendingDuplicateResolver(false);
+        pendingDuplicateResolver = null;
+      }
+      showToast("Lectura cancelada");
+    });
+
+    btnDuplicateYes.addEventListener("click", () => {
+      closeDuplicateModal();
+      if(pendingDuplicateResolver){
+        pendingDuplicateResolver(true);
+        pendingDuplicateResolver = null;
+      }
+    });
 
     async function processAndSendCodigo(rawCode){
       const codigo = String(rawCode || "").trim();
@@ -448,9 +536,8 @@
       }
 
       if(codigo === lastCodigoEnviado){
-        const continuar = confirm("MISMO CÓDIGO LEÍDO ¿continuar?");
-        if(!continuar){
-          showToast("Lectura cancelada");
+        const registrar = await askDuplicateConfirmation(codigo);
+        if(!registrar){
           return;
         }
       }
@@ -470,7 +557,6 @@
       refreshQrValidation();
 
       showToast(`LECTURA CORRECTA ✓  |  Pendientes: ${pending}`);
-
       flushQueue();
 
       setTimeout(() => {
@@ -486,14 +572,6 @@
     });
 
     elCodigoQr.addEventListener("input", refreshQrValidation);
-
-    // =========================
-    // ESCÁNER QR
-    // =========================
-    let html5QrCode = null;
-    let scannerRunning = false;
-    let lastScanText = "";
-    let lastScanAt = 0;
 
     function canAcceptScan(decodedText){
       const now = Date.now();
@@ -597,18 +675,12 @@
     btnStartScan.addEventListener("click", startScanner);
     btnStopScan.addEventListener("click", stopScanner);
 
-    // =========================
-    // SERVICE WORKER
-    // =========================
     if("serviceWorker" in navigator){
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js").catch(console.error);
       });
     }
 
-    // =========================
-    // INIT
-    // =========================
     window.addEventListener("load", () => {
       restoreSettings();
       updateNetStatus();
