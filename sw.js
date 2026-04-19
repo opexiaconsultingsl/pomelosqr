@@ -1,4 +1,4 @@
-const CACHE_NAME = "control-confeccion-cache-v5";
+const CACHE_NAME = "control-confeccion-cache-v6";
 const ASSETS = [
   "./",
   "./index.html",
@@ -31,13 +31,34 @@ self.addEventListener("fetch", (event) => {
 
   if (req.method !== "GET") return;
 
+  const url = new URL(req.url);
+
+  // Para el HTML principal: intentar red primero
+  if (req.mode === "navigate" || url.pathname.endsWith("/index.html")) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put("./index.html", resClone));
+          return res;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  // Para el resto: cache first
   event.respondWith(
     caches.match(req).then(cached => {
-      return cached || fetch(req).then(res => {
-        const resClone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
-        return res;
-      }).catch(() => caches.match("./index.html"));
+      if (cached) return cached;
+
+      return fetch(req)
+        .then(res => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
+          return res;
+        })
+        .catch(() => caches.match("./index.html"));
     })
   );
 });
