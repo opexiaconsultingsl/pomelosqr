@@ -1,589 +1,220 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0e1b2a" />
-  <title>Control Confección</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#0e1b2a"/>
+<title>Control Confección</title>
 
-  <link rel="manifest" href="manifest.webmanifest" />
+<link rel="manifest" href="manifest.webmanifest"/>
 
-  <style>
-    :root{
-      --ink:#0e1b2a;
-      --green:#7fe28f;
-      --green-soft:#f4fdf6;
-      --stroke:#0e1b2a;
-      --radius:16px;
-      --shadow:0 8px 20px rgba(0,0,0,.15);
-    }
+<style>
+:root{
+  --ink:#0e1b2a;
+  --green:#7fe28f;
+  --green-soft:#f4fdf6;
+  --red:#e69095;
+  --stroke:#0e1b2a;
+  --radius:16px;
+  --shadow:0 8px 20px rgba(0,0,0,.15);
+}
+*{box-sizing:border-box;font-family:system-ui;}
+body{margin:0;background:#fff;display:flex;justify-content:center;padding:24px;color:var(--ink);}
+.app{width:min(420px,100%);}
+h1{margin:0 0 20px 0;}
 
-    *{
-      box-sizing:border-box;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    }
+.field{margin-bottom:18px;display:flex;flex-direction:column;gap:6px;}
+label{font-size:12px;font-weight:700;}
+input,select{padding:14px;border-radius:10px;border:1px solid #ccc;font-size:16px;}
 
-    body{
-      margin:0;
-      background:#fff;
-      display:flex;
-      justify-content:center;
-      padding:24px 14px;
-      color:var(--ink);
-    }
-
-    .app{
-      width:min(430px,100%);
-    }
-
-    .header{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      margin-bottom:28px;
-    }
-
-    .logo{
-      width:60px;
-      height:60px;
-      border-radius:12px;
-      overflow:hidden;
-      border:1px solid rgba(0,0,0,.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#fff;
-    }
-
-    .logo img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-    }
-
-    h1{
-      margin:0;
-      font-size:28px;
-      letter-spacing:.3px;
-      line-height:1.05;
-    }
-
-    .field{
-      margin-bottom:18px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    label{
-      font-size:13px;
-      font-weight:700;
-      opacity:.78;
-      text-transform:uppercase;
-      letter-spacing:.4px;
-    }
-
-    input, select{
-      width:100%;
-      padding:15px 14px;
-      border-radius:12px;
-      border:1px solid rgba(0,0,0,.25);
-      font-size:17px;
-      outline:none;
-      background:#fff;
-    }
-
-    input:focus, select:focus{
-      border-color:var(--ink);
-      box-shadow:0 0 0 3px rgba(14,27,42,.08);
-    }
-
-    .scanner-box{
-      border:1px solid rgba(0,0,0,.14);
-      border-radius:16px;
-      padding:14px;
-      background:#fafafa;
-      margin-bottom:18px;
-    }
-
-    .scanner-actions{
-      display:flex;
-      gap:10px;
-      margin-top:10px;
-    }
-
-    .scanner-actions button{
-      flex:1;
-    }
-
-    .btn{
-      width:100%;
-      padding:18px;
-      border-radius:var(--radius);
-      border:2px solid var(--stroke);
-      font-weight:800;
-      font-size:18px;
-      cursor:pointer;
-      transition:background .2s ease, opacity .15s ease, filter .15s ease;
-      background:var(--green-soft);
-      color:var(--ink);
-    }
-
-    .btn.active{
-      background:var(--green);
-      box-shadow:var(--shadow);
-    }
-
-    #reader{
-      width:100%;
-      overflow:hidden;
-      border-radius:12px;
-      background:#000;
-      min-height:220px;
-      display:none;
-    }
-
-    .status{
-      margin-top:8px;
-      font-size:13px;
-      font-weight:700;
-      opacity:.8;
-    }
-
-    .mini{
-      margin-top:6px;
-      font-size:12px;
-      opacity:.7;
-    }
-
-    .pill-row{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-    }
-
-    .pill{
-      border:1px solid rgba(0,0,0,.12);
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:700;
-      background:#fff;
-    }
-
-    .hidden{
-      display:none !important;
-    }
-
-    .error{
-      color:#b42318;
-      font-size:12px;
-      font-weight:700;
-      display:none;
-    }
-
-    @media (max-width:420px){
-      h1{ font-size:24px; }
-      .btn{ font-size:16px; padding:16px; }
-    }
-  </style>
+.btn{width:100%;padding:16px;border-radius:14px;border:2px solid var(--stroke);font-weight:800;background:var(--green);cursor:pointer;}
+#reader{width:100%;margin-top:10px;border-radius:10px;display:none;}
+</style>
 </head>
+
 <body>
-  <div class="app">
-    <div class="header">
-      <div class="logo">
-        <img src="Ametller.png" alt="Logo">
-      </div>
-      <h1>CONTROL CONFECCIÓN</h1>
-    </div>
+<div class="app">
 
-    <div class="pill-row">
-      <div class="pill" id="netStatus">Sin comprobar red</div>
-      <div class="pill" id="queueStatus">Pendientes: 0</div>
-    </div>
+<h1>CONTROL CONFECCIÓN</h1>
 
-    <div class="field">
-      <label for="tipoConfeccion">TIPO DE CONFECCIÓN</label>
-      <select id="tipoConfeccion">
-        <option value="8">8 kg</option>
-        <option value="10">10 kg</option>
-        <option value="12">12 kg</option>
-        <option value="14">14 kg</option>
-        <option value="16">16 kg</option>
-        <option value="20">20 kg</option>
-      </select>
-    </div>
+<div class="field">
+<label>TIPO DE CONFECCIÓN</label>
+<select id="tipoConfeccion">
+<option value="8">8 kg</option>
+<option value="10">10 kg</option>
+<option value="12">12 kg</option>
+<option value="14">14 kg</option>
+<option value="16">16 kg</option>
+<option value="20">20 kg</option>
+</select>
+</div>
 
-    <div class="field">
-      <label for="calidad">CALIDAD</label>
-      <select id="calidad">
-        <option value="EXTRA">Extra</option>
-        <option value="PRIMERA">Primera</option>
-        <option value="SEGUNDA">Segunda</option>
-      </select>
-    </div>
+<div class="field">
+<label>CALIDAD</label>
+<select id="calidad">
+<option value="EXTRA">Extra</option>
+<option value="PRIMERA">Primera</option>
+<option value="SEGUNDA">Segunda</option>
+</select>
+</div>
 
-    <div class="field">
-      <label for="codigoQr">CÓDIGO QR</label>
-      <input
-        id="codigoQr"
-        placeholder="Escanea o escribe el código QR"
-        autocomplete="off"
-        inputmode="text"
-      />
-      <div id="codigoError" class="error">Introduce un código QR válido.</div>
-    </div>
+<div class="field">
+<label>CÓDIGO QR</label>
+<input id="codigoQr" placeholder="Escanear QR"/>
+</div>
 
-    <div class="scanner-box">
-      <button id="btnStartScan" class="btn active" type="button">Abrir cámara</button>
+<button id="btnScan" class="btn">Abrir cámara</button>
 
-      <div class="scanner-actions hidden" id="scannerActions">
-        <button id="btnStopScan" class="btn" type="button">Detener cámara</button>
-      </div>
+<div id="reader"></div>
 
-      <div id="reader"></div>
-      <div class="status" id="scanStatus">Preparado para escanear o introducir QR manualmente.</div>
-      <div class="mini">El envío se realiza automáticamente tras cada lectura.</div>
-    </div>
-  </div>
+</div>
 
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script>
-    // =========================
-    // CONFIG
-    // =========================
-    const API_URL = "https://TU_URL_DE_GOOGLE_APPS_SCRIPT/exec";
+<script src="https://unpkg.com/html5-qrcode"></script>
 
-    // =========================
-    // ELEMENTOS
-    // =========================
-    const elTipoConfeccion = document.getElementById("tipoConfeccion");
-    const elCalidad = document.getElementById("calidad");
-    const elCodigoQr = document.getElementById("codigoQr");
-    const elCodigoError = document.getElementById("codigoError");
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyeAlya_wQ54nN7lxy2nqL70yxnOWUf2yD34Ld2pdljCjVAOgChmGO54rLAIsHcUmOeRA/exec";
 
-    const btnStartScan = document.getElementById("btnStartScan");
-    const btnStopScan = document.getElementById("btnStopScan");
-    const readerEl = document.getElementById("reader");
-    const scannerActions = document.getElementById("scannerActions");
-    const scanStatus = document.getElementById("scanStatus");
-    const netStatus = document.getElementById("netStatus");
-    const queueStatus = document.getElementById("queueStatus");
+/* =========================
+   PERSISTENCIA
+========================= */
+const SETTINGS_KEY="conf_settings";
 
-    // =========================
-    // PERSISTENCIA CAMPOS FIJOS
-    // =========================
-    const SETTINGS_KEY = "control_confeccion_settings_v1";
+function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY,JSON.stringify({
+    tipo:tipo.value,
+    calidad:calidad.value
+  }));
+}
 
-    function loadSettings(){
-      try{
-        return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
-      }catch{
-        return {};
-      }
+function loadSettings(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
+    if(s.tipo) tipo.value=s.tipo;
+    if(s.calidad) calidad.value=s.calidad;
+  }catch{}
+}
+
+/* =========================
+   COLA OFFLINE
+========================= */
+const QKEY="queue";
+
+function loadQ(){return JSON.parse(localStorage.getItem(QKEY)||"[]");}
+function saveQ(q){localStorage.setItem(QKEY,JSON.stringify(q));}
+
+function enqueue(i){
+  const q=loadQ();
+  q.push(i);
+  saveQ(q);
+}
+
+function dequeue(){
+  const q=loadQ();
+  const i=q.shift();
+  saveQ(q);
+  return i;
+}
+
+async function sendOne(i){
+  const url=new URL(API_URL);
+  Object.keys(i).forEach(k=>url.searchParams.set(k,i[k]));
+  const r=await fetch(url);
+  const d=await r.json();
+  if(!d.ok) throw "error";
+}
+
+async function flush(){
+  const q=loadQ();
+  if(!q.length) return;
+  try{
+    await sendOne(q[0]);
+    dequeue();
+  }catch{}
+}
+
+setInterval(flush,3000);
+window.addEventListener("online",flush);
+
+/* =========================
+   CONTROL QR
+========================= */
+let lastCodigo="";
+let lastScan="";
+let lastScanTime=0;
+
+function canScan(text){
+  const now=Date.now();
+  if(text===lastScan && now-lastScanTime<1500) return false;
+  lastScan=text;
+  lastScanTime=now;
+  return true;
+}
+
+async function processQR(text){
+  if(!text) return;
+
+  // DUPLICADO
+  if(text===lastCodigo){
+    if(!confirm("⚠️ MISMO CÓDIGO LEÍDO\n¿Continuar?")){
+      return;
     }
+  }
 
-    function saveSettings(){
-      const settings = {
-        tipo_confeccion: elTipoConfeccion.value,
-        calidad: elCalidad.value
-      };
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    }
+  const item={
+    tipo_confeccion:tipo.value,
+    calidad:calidad.value,
+    codigo_qr:text,
+    ts_client:new Date().toISOString(),
+    id:Date.now().toString()
+  };
 
-    function restoreSettings(){
-      const s = loadSettings();
-      if(s.tipo_confeccion) elTipoConfeccion.value = s.tipo_confeccion;
-      if(s.calidad) elCalidad.value = s.calidad;
-    }
+  enqueue(item);
+  lastCodigo=text;
 
-    elTipoConfeccion.addEventListener("change", saveSettings);
-    elCalidad.addEventListener("change", saveSettings);
+  alert("LECTURA CORRECTA");
 
-    // =========================
-    // TOAST
-    // =========================
-    const toast = document.createElement("div");
-    toast.style.cssText = `
-      position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
-      padding:10px 14px; border:1px solid rgba(0,0,0,.2); border-radius:999px;
-      background:white; box-shadow:0 8px 20px rgba(0,0,0,.15);
-      font-weight:800; font-size:13px; opacity:0; transition:opacity .15s ease;
-      z-index:9999; max-width:90vw; text-align:center;
-    `;
-    document.body.appendChild(toast);
+  flush();
+}
 
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.style.opacity = "1";
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => (toast.style.opacity = "0"), 1400);
-    }
+/* =========================
+   SCANNER
+========================= */
+let qr;
 
-    // =========================
-    // UTILIDADES
-    // =========================
-    function updateNetStatus(){
-      netStatus.textContent = navigator.onLine ? "Online" : "Offline";
-    }
+async function startScan(){
+  qr=new Html5Qrcode("reader");
+  document.getElementById("reader").style.display="block";
 
-    function updateQueueStatus(){
-      queueStatus.textContent = `Pendientes: ${queueLength()}`;
-    }
+  const cams=await Html5Qrcode.getCameras();
+  const id=cams[0].id;
 
-    function makeId(){
-      return (Date.now().toString(36) + Math.random().toString(36).slice(2,8)).toUpperCase();
-    }
-
-    function isValidQr(value){
-      return value.trim().length > 0;
-    }
-
-    function refreshQrValidation(){
-      const v = elCodigoQr.value.trim();
-      elCodigoError.style.display = (v && !isValidQr(v)) ? "block" : "none";
-    }
-
-    // =========================
-    // COLA OFFLINE
-    // =========================
-    const QKEY = "control_confeccion_queue_v1";
-
-    function loadQueue(){
-      try{
-        return JSON.parse(localStorage.getItem(QKEY) || "[]");
-      }catch{
-        return [];
-      }
-    }
-
-    function saveQueue(q){
-      localStorage.setItem(QKEY, JSON.stringify(q));
-      updateQueueStatus();
-    }
-
-    function enqueue(item){
-      const q = loadQueue();
-      q.push(item);
-      saveQueue(q);
-      return q.length;
-    }
-
-    function dequeue(){
-      const q = loadQueue();
-      const item = q.shift();
-      saveQueue(q);
-      return item;
-    }
-
-    function queueLength(){
-      return loadQueue().length;
-    }
-
-    let sending = false;
-
-    async function sendOne(item){
-      const url = new URL(API_URL);
-      url.searchParams.set("tipo_confeccion", item.tipo_confeccion);
-      url.searchParams.set("calidad", item.calidad);
-      url.searchParams.set("codigo_qr", item.codigo_qr);
-      url.searchParams.set("ts_client", item.ts_client);
-      url.searchParams.set("id", item.id);
-
-      const res = await fetch(url.toString(), {
-        method: "GET",
-        cache: "no-store"
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if(!(res.ok && data.ok)){
-        throw new Error("API error");
-      }
-    }
-
-    async function flushQueue(){
-      if(sending) return;
-      if(queueLength() === 0) return;
-
-      sending = true;
-
-      try{
-        while(queueLength() > 0){
-          const item = loadQueue()[0];
-
-          try{
-            await sendOne(item);
-            dequeue();
-            showToast(`Enviado ✓ Pendientes: ${queueLength()}`);
-          }catch(err){
-            showToast(`Sin enviar ⏳ Pendientes: ${queueLength()}`);
-            break;
-          }
-        }
-      }finally{
-        sending = false;
-      }
-    }
-
-    window.addEventListener("online", () => {
-      updateNetStatus();
-      flushQueue();
+  await qr.start(id,{fps:10,qrbox:250},
+    txt=>{
+      if(!canScan(txt)) return;
+      processQR(txt);
     });
+}
 
-    window.addEventListener("offline", updateNetStatus);
-    setInterval(flushQueue, 4000);
+document.getElementById("btnScan").onclick=startScan;
 
-    // =========================
-    // ENVÍO AUTOMÁTICO
-    // =========================
-    async function processAndSendCodigo(rawCode){
-      const codigo = String(rawCode || "").trim();
-      const tipoConfeccion = elTipoConfeccion.value;
-      const calidad = elCalidad.value;
+/* =========================
+   INIT
+========================= */
+const tipo=document.getElementById("tipoConfeccion");
+const calidad=document.getElementById("calidad");
 
-      if(!isValidQr(codigo)){
-        refreshQrValidation();
-        showToast("Código QR inválido");
-        return;
-      }
+tipo.onchange=saveSettings;
+calidad.onchange=saveSettings;
 
-      const item = {
-        id: makeId(),
-        tipo_confeccion: tipoConfeccion,
-        calidad: calidad,
-        codigo_qr: codigo,
-        ts_client: new Date().toISOString()
-      };
+loadSettings();
 
-      const pending = enqueue(item);
+/* =========================
+   SERVICE WORKER
+========================= */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js");
+}
+</script>
 
-      elCodigoQr.value = "";
-      refreshQrValidation();
-
-      showToast(`Guardado local ✓ Pendientes: ${pending}`);
-
-      flushQueue();
-
-      setTimeout(() => {
-        elCodigoQr.focus();
-      }, 50);
-    }
-
-    // Envío al pulsar Enter si el lector escribe en el input
-    elCodigoQr.addEventListener("keydown", function(e){
-      if(e.key === "Enter"){
-        e.preventDefault();
-        processAndSendCodigo(elCodigoQr.value);
-      }
-    });
-
-    elCodigoQr.addEventListener("input", refreshQrValidation);
-
-    // =========================
-    // ESCÁNER QR
-    // =========================
-    let html5QrCode = null;
-    let scannerRunning = false;
-    let lastScanText = "";
-    let lastScanAt = 0;
-
-    function canAcceptScan(decodedText){
-      const now = Date.now();
-      if(decodedText === lastScanText && (now - lastScanAt) < 1500){
-        return false;
-      }
-      lastScanText = decodedText;
-      lastScanAt = now;
-      return true;
-    }
-
-    async function startScanner(){
-      if(scannerRunning) return;
-
-      try{
-        readerEl.style.display = "block";
-        scannerActions.classList.remove("hidden");
-        scanStatus.textContent = "Abriendo cámara...";
-
-        html5QrCode = new Html5Qrcode("reader");
-
-        const cameras = await Html5Qrcode.getCameras();
-        if(!cameras || cameras.length === 0){
-          throw new Error("No se ha detectado ninguna cámara");
-        }
-
-        let cameraId = cameras[0].id;
-
-        const backCamera = cameras.find(c =>
-          /back|rear|environment|trasera/i.test((c.label || ""))
-        );
-        if(backCamera) cameraId = backCamera.id;
-
-        await html5QrCode.start(
-          cameraId,
-          {
-            fps: 10,
-            qrbox: { width: 220, height: 220 }
-          },
-          async (decodedText) => {
-            if(!canAcceptScan(decodedText)) return;
-
-            elCodigoQr.value = decodedText;
-            scanStatus.textContent = `QR leído: ${decodedText}`;
-            await processAndSendCodigo(decodedText);
-          },
-          () => {}
-        );
-
-        scannerRunning = true;
-        scanStatus.textContent = "Cámara activa. Apunta al código QR.";
-      }catch(err){
-        readerEl.style.display = "none";
-        scanStatus.textContent = "No se pudo abrir la cámara.";
-        showToast("Error al abrir cámara");
-        console.error(err);
-      }
-    }
-
-    async function stopScanner(){
-      if(!html5QrCode || !scannerRunning) return;
-
-      try{
-        await html5QrCode.stop();
-        await html5QrCode.clear();
-      }catch(err){
-        console.error(err);
-      }finally{
-        html5QrCode = null;
-        scannerRunning = false;
-        readerEl.style.display = "none";
-        scanStatus.textContent = "Cámara detenida.";
-      }
-    }
-
-    btnStartScan.addEventListener("click", startScanner);
-    btnStopScan.addEventListener("click", stopScanner);
-
-    // =========================
-    // SERVICE WORKER
-    // =========================
-    if("serviceWorker" in navigator){
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(console.error);
-      });
-    }
-
-    // =========================
-    // INIT
-    // =========================
-    window.addEventListener("load", () => {
-      restoreSettings();
-      updateNetStatus();
-      updateQueueStatus();
-      elCodigoQr.focus();
-      flushQueue();
-    });
-  </script>
 </body>
 </html>
